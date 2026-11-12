@@ -155,7 +155,7 @@ app.layout = html.Div(className='page', children=[
             html.Div('RallyScope', className='logo'),
             html.Div('INTERACTIVE BADMINTON PERFORMANCE & RIVALRY ANALYTICS', className='subtitle'),
         ]),
-        html.Div('NYU Tandon · Week 7 prototype', className='eyebrow')
+        html.Div('NYU', className='eyebrow')
     ]),
     html.Section(className='filters', children=[
         html.Div([html.Label('Year range'), dcc.RangeSlider(
