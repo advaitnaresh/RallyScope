@@ -1,0 +1,22 @@
+:root {--purple:#57068c;--lav:#7548b4;--ink:#24213a;--muted:#667085;--line:#e6deef;--page:#f8f7fa}
+*{box-sizing:border-box}
+body{margin:0;background:var(--page);font:15px/1.5 Arial,Helvetica,sans-serif;color:var(--ink)}
+.page{max-width:1520px;margin:0 auto;padding:20px 24px 32px}
+.header{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;margin:2px 0 22px}
+.logo{font-weight:850;font-size:34px;letter-spacing:-1.4px;color:var(--purple)}
+.subtitle{font-size:12px;letter-spacing:.8px;color:var(--muted);font-weight:700}
+.eyebrow{font-size:13px;color:var(--purple);font-weight:700;white-space:nowrap;margin-top:8px}
+.filters{display:grid;grid-template-columns:minmax(200px,1.2fr) minmax(220px,1fr) minmax(240px,1.2fr) auto;gap:16px;padding:18px;background:#fff;border:1px solid var(--line);border-radius:14px;align-items:end;box-shadow:0 2px 12px rgba(25,15,46,.03)}
+.filter label{display:block;margin-bottom:9px;color:#413855;font-size:13px;font-weight:700}
+.years{padding:0 8px 10px}
+.reset{border:0;background:var(--purple);color:#fff;padding:12px 16px;border-radius:10px;cursor:pointer;font-weight:700;min-height:40px}
+.reset:hover{background:#42036c}
+.data-strip{margin:16px 0 8px;display:flex;gap:24px;flex-wrap:wrap;color:var(--muted);font-size:13px}
+.data-strip b{color:var(--purple)}
+.status{margin:10px 0 16px;color:var(--purple);font-size:13px;font-weight:700}
+.top-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.chart-card{background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 3px 18px rgba(42,20,78,.04);overflow:hidden}
+.rivalry{margin-top:16px}
+.footer{font-size:12px;color:var(--muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-top:19px;padding-top:12px;border-top:1px solid var(--line)}
+@media(max-width:1080px){.filters{grid-template-columns:1fr 1fr}.top-grid{grid-template-columns:1fr}}
+@media(max-width:640px){.page{padding:12px}.header{flex-direction:column;gap:2px}.filters{grid-template-columns:1fr}.logo{font-size:29px}.data-strip{gap:8px}}

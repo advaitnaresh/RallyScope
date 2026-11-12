@@ -1,0 +1,7 @@
+.venv/
+__pycache__/
+.pytest_cache/
+*.pyc
+.DS_Store
+# Original external data: download at setup time, do not claim it is newly authored.
+data/matches.csv
