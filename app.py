@@ -68,9 +68,9 @@ def empty_figure(title: str, subtitle: str, message: str) -> go.Figure:
 
 
 def comeback_fig(df, selection):
-    # The proposal's ranking rule is >=10 opportunities. A selected subset may
-    # be smaller, so show exploratory contextual values but label them as such.
-    contextual = bool(selection)
+    # Keep the proposal's >=10-opportunity ranking for discipline selections.
+    # Player and rivalry selections can show smaller contextual samples.
+    contextual = bool(selection and selection.get('type') in ('player', 'rivalry'))
     required = 1 if contextual else 10
     s = comeback_summary(df, min_opportunities=required).head(12)
     if s.empty:

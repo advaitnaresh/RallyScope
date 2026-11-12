@@ -1,0 +1,16 @@
+{
+  "source_rows": 105147,
+  "structurally_valid_rows": 105147,
+  "score_valid_matches": 103074,
+  "excluded_rows": 2073,
+  "years": "2007\u20132026",
+  "disciplines": [
+    "MD",
+    "MS",
+    "WD",
+    "WS",
+    "XD"
+  ],
+  "tournaments": 554,
+  "notes": "Retirements, defaults, unparseable scores, and scores conflicting with winner are excluded from analytic rates."
+}
