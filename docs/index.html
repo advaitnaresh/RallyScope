@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RallyScope · Badminton Analytics</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="page">
+    <header class="header">
+      <div><h1>RallyScope</h1><p>INTERACTIVE BADMINTON PERFORMANCE &amp; RIVALRY ANALYTICS</p></div>
+      <strong>NYU</strong>
+    </header>
+    <section class="filters" aria-label="Dashboard filters">
+      <div class="filter"><label for="start-year">Year range</label><div class="year-inputs"><select id="start-year"></select><span>to</span><select id="end-year"></select></div></div>
+      <fieldset class="filter"><legend>Discipline</legend><div id="disciplines" class="checks"></div></fieldset>
+      <div class="filter tier-filter"><label for="tier-menu">Tournament tier</label><details id="tier-menu"><summary>All tournament tiers</summary><div id="tiers" class="tier-list"></div></details></div>
+      <button id="clear" type="button">Clear chart selection</button>
+    </section>
+    <div class="data-strip"><span>Score-valid matches: <b id="valid-count">Loading…</b></span><span>Original source rows: <b id="source-count">—</b></span><span>Excluded incomplete/ambiguous rows: <b id="excluded-count">—</b></span></div>
+    <p id="status" class="status" role="status">Loading full source CSV…</p>
+    <div class="top-grid">
+      <section class="card"><h2>A · Comeback leaders</h2><p class="subhead" id="comeback-subhead">Recovery win rate after Game 1 loss · minimum 10 opportunities</p><div id="comeback-chart" class="chart"></div></section>
+      <section class="card"><h2>B · Singles vs. doubles</h2><p class="subhead">Deciding-game frequency across five disciplines</p><div id="competition-chart" class="chart"></div></section>
+    </div>
+    <section class="card rivalry"><h2>C · Competitive rivalries</h2><p class="subhead">Parity 100% means a 50/50 record · circle size = number of deciding games</p><div id="rivalry-chart" class="chart"></div></section>
+    <footer><span>Click a bar or rivalry circle to filter the other charts. Clear chart selection returns to the current year, discipline, and tier filters.</span><span>Source: <a href="https://github.com/SahilMotyar/bwf-match-data">Sahil Motyar / BWF Match Data</a>; underlying results © BWF. Not an official BWF product.</span></footer>
+  </main>
+  <div id="tooltip" class="tooltip" role="tooltip" hidden></div>
+  <script src="app.js" defer></script>
+</body>
+</html>

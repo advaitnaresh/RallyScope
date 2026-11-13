@@ -3,6 +3,10 @@
 **Interactive Badminton Performance & Rivalry Analytics**  
 NYU Information Visualization • Plotly Dash + Pandas • NYU-inspired purple palette
 
+## Browser version
+
+The `docs/` folder contains a GitHub Pages version of the same three-view dashboard. It runs in a browser without a Python server, reads the full CSV directly from the [credited source repository](https://github.com/SahilMotyar/bwf-match-data), and applies the same score-validity rules. The site supports year, discipline, and tier filters; hover details; and chart selections that update the other views. A network connection is required to load the source CSV. The Python Dash app below remains the local version used for development and in-class demonstration.
+
 ## What this prototype implements
 
 The app loads the **full proposed BWF match dataset** after you run the download step, validates recorded score sequences, and displays three separate research views from the Week 5 proposal:
