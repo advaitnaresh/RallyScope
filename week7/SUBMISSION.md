@@ -9,7 +9,7 @@
 2. **Recorded five-minute pitch and dashboard demo:** https://drive.google.com/file/d/1Ug9ia-M7fCxOrZ6MWdCXmtVvEbHpt4y4/view?usp=sharing
 3. **Screenshot 1 — full dashboard:** `screenshots/03_hosted_overview.png`
 4. **Screenshot 2 — linked filtering:** `screenshots/04_hosted_linked_filtering.png`
-5. **Repository with local Dash setup instructions:** https://github.com/advaitnaresh/RallyScope (private; grader access is needed to open the repository)
+5. **Public repository with local Dash setup instructions:** https://github.com/advaitnaresh/RallyScope
 
 The live GitHub Pages dashboard is public and works without installing Python. It retrieves the full CSV from the credited source repository at runtime. The repository contains the original Python Dash prototype and the source for the browser edition.
 

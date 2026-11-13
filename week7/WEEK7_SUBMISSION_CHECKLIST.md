@@ -5,7 +5,7 @@
 - [x] **Encodings Applied (4 pts)**: Comeback rate → bar length; discipline → category/hue; deciding-game rate → bar height; meetings → X position; parity → Y position; number of deciding games → bubble size. Year/tier are filters.
 - [x] **Basic Interaction & Linking (4 pts)**: Comeback, discipline, and rivalry clicks updated the other views; hover details, year/tier filters, and clear selection worked in the live dashboard.
 - [ ] **Peer Feedback Session (4 pts)**: A recorded pitch and demo are available, but no actual peer names, issues, or planned changes were supplied. The recording does not document the rubric's requested peer feedback log.
-- [x] **Submit package prepared**: Public GitHub Pages dashboard, two screenshots of its actual views, the recorded demo link, and the repository with setup instructions are listed in `SUBMISSION.md`. The repository remains private, so grant the grader access if you want them to inspect its code.
+- [x] **Submit package prepared**: Public GitHub Pages dashboard, two screenshots of its actual views, the recorded demo link, and the public repository with setup instructions are listed in `SUBMISSION.md`.
 
 **Run check:** If the grader cannot execute the app, criteria 2–4 are each capped at 2. Test installation and startup on your own machine before submission.
 
