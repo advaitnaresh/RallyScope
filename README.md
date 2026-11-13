@@ -5,6 +5,8 @@ NYU Information Visualization • Plotly Dash + Pandas • NYU-inspired purple p
 
 ## Browser version
 
+**Live interactive dashboard:** https://advaitnaresh.github.io/RallyScope/
+
 The `docs/` folder contains a GitHub Pages version of the same three-view dashboard. It runs in a browser without a Python server, reads the full CSV directly from the [credited source repository](https://github.com/SahilMotyar/bwf-match-data), and applies the same score-validity rules. The site supports year, discipline, and tier filters; hover details; and chart selections that update the other views. A network connection is required to load the source CSV. The Python Dash app below remains the local version used for development and in-class demonstration.
 
 ## What this prototype implements
