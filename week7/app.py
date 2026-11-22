@@ -13,6 +13,7 @@ import numpy as np
 from dash import Dash, dcc, html, Input, Output, ctx
 from dash.exceptions import PreventUpdate
 import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 
 from data_pipeline import (
     load_matches, select_matches, comeback_summary,
@@ -70,7 +71,7 @@ def empty_figure(title: str, subtitle: str, message: str) -> go.Figure:
 def comeback_fig(df, selection):
     # Keep the proposal's >=10-opportunity ranking for discipline selections.
     # Player and rivalry selections can show smaller contextual samples.
-    contextual = bool(selection and selection.get('type') in ('player', 'rivalry'))
+    contextual = bool(selection and selection.get('type') == 'rivalry')
     required = 1 if contextual else 10
     s = comeback_summary(df, min_opportunities=required).head(12)
     if s.empty:
@@ -83,25 +84,29 @@ def comeback_fig(df, selection):
     custom = np.stack([s['competitor'], s['comeback_wins'], s['opportunities']], axis=-1)
     fig.add_trace(go.Bar(
         y=s['competitor'], x=s['rate_pct'], orientation='h',
-        marker={'color': [PURPLE if i == len(s)-1 else LAVENDER for i in range(len(s))]},
-        customdata=custom, text=[f'{r:.1f}%' for r in s['rate_pct']],
+        marker={'color': [PURPLE if selection and selection.get('type') == 'player' and selection.get('value') == name else LAVENDER for name in s['competitor']]},
+        customdata=custom, text=[f'{r:.1f}% (n={n})' for r, n in zip(s['rate_pct'], s['opportunities'])],
         textposition='outside', cliponaxis=False,
         hovertemplate='<b>%{customdata[0]}</b><br>Comeback rate %{x:.1f}%'
                       '<br>Wins %{customdata[1]} / opportunities %{customdata[2]}<extra></extra>',
     ))
-    fig.update_layout(margin={'l': 150, 'r': 42, 't': 84, 'b': 58}, height=460)
+    fig.update_layout(margin={'l': 150, 'r': 105, 't': 84, 'b': 58}, height=460)
     fig.update_xaxes(title='Comeback success rate (%)', range=[0, max(45, min(108, float(s['rate_pct'].max())+12))])
     fig.update_yaxes(title=None, showgrid=False, automargin=True)
     return fig
 
 
-def competition_fig(df):
+def competition_fig(df, selection=None):
     s = competitiveness_summary(df)
     if s.empty:
         return empty_figure('B · Singles vs. doubles', 'Deciding-game frequency',
                             'No score-valid matches for this filter.')
     fig = base_figure('B · Singles vs. doubles', 'Deciding-game frequency across five disciplines')
-    colors = [PURPLE if d in ('MS', 'WS') else LAVENDER for d in s['discipline'].astype(str)]
+    layout = fig.layout
+    fig = make_subplots(rows=2, cols=1, shared_xaxes=True, vertical_spacing=0.16,
+                        row_heights=[0.7, 0.3])
+    fig.update_layout(layout)
+    colors = [PURPLE if selection and selection.get('type') == 'discipline' and selection.get('value') == d else LAVENDER for d in s['discipline'].astype(str)]
     custom = np.stack([s['discipline'].astype(str), s['matches'],
                        s['deciding'], s['avg_game_margin'].round(2)], axis=-1)
     fig.add_trace(go.Bar(
@@ -111,15 +116,24 @@ def competition_fig(df):
         hovertemplate='<b>%{customdata[0]}</b><br>Deciding-game rate %{y:.1f}%'
                       '<br>Deciding matches: %{customdata[2]} / %{customdata[1]}'
                       '<br>Avg game-point margin: %{customdata[3]}<extra></extra>',
-    ))
-    fig.update_layout(height=460, margin={'l': 56, 'r': 30, 't': 84, 'b': 64})
-    fig.update_xaxes(title='MS · WS · MD · WD · XD (click to filter)', type='category',
-                     categoryorder='array', categoryarray=list(DISCIPLINES))
-    fig.update_yaxes(title='Deciding-game rate (%)', range=[0, max(50, min(100, float(s['rate_pct'].max())+12))], ticksuffix='%')
+    ), row=1, col=1)
+    fig.add_trace(go.Scatter(
+        x=s['discipline'].astype(str), y=s['avg_game_margin'], mode='markers+text',
+        marker={'color': colors, 'size': 11, 'line': {'color': MUTED, 'width': 1}},
+        customdata=custom, text=[f'{v:.1f}' for v in s['avg_game_margin']],
+        textposition='top center', cliponaxis=False,
+        hovertemplate='<b>%{customdata[0]}</b><br>Avg game-point margin: %{y:.2f} points'
+                      '<br>Matches: %{customdata[1]}<extra></extra>',
+    ), row=2, col=1)
+    fig.update_layout(height=530, margin={'l': 72, 'r': 30, 't': 84, 'b': 64})
+    fig.update_xaxes(type='category', categoryorder='array', categoryarray=list(DISCIPLINES))
+    fig.update_xaxes(title='MS · WS · MD · WD · XD (click to filter)', row=2, col=1)
+    fig.update_yaxes(title='Deciding-game rate (%)', range=[0, max(50, min(100, float(s['rate_pct'].max())+12))], ticksuffix='%', row=1, col=1)
+    fig.update_yaxes(title='Avg margin (points)', range=[0, max(1, float(s['avg_game_margin'].max()) * 1.35)], row=2, col=1)
     return fig
 
 
-def rivalry_fig(df):
+def rivalry_fig(df, selection=None):
     s = rivalry_summary(df, min_meetings=6).head(120)
     if s.empty:
         return empty_figure('C · Competitive rivalries', 'Head-to-head parity and meetings',
@@ -131,7 +145,7 @@ def rivalry_fig(df):
                       'Parity 100% means a 50/50 record · circle size = number of deciding games')
     fig.add_trace(go.Scatter(
         x=s['meetings'], y=s['parity_pct'], mode='markers',
-        marker={'size': sizes, 'color': VIOLET, 'opacity': .64,
+        marker={'size': sizes, 'color': [PURPLE if selection and selection.get('type') == 'rivalry' and selection.get('value') == rid else LAVENDER for rid in s['rivalry_id']], 'opacity': .8,
                 'line': {'color': PURPLE, 'width': .7}},
         customdata=custom,
         hovertemplate='<b>%{customdata[1]} vs. %{customdata[2]}</b>'
@@ -141,8 +155,8 @@ def rivalry_fig(df):
                       '<br>Deciding games %{customdata[5]}<extra></extra>',
     ))
     fig.update_layout(height=400, margin={'l': 60, 'r': 36, 't': 85, 'b': 60})
-    fig.update_xaxes(title='Head-to-head meetings (min. 6)', rangemode='tozero')
-    fig.update_yaxes(title='Rivalry parity (%)', range=[0, 105], ticksuffix='%')
+    fig.update_xaxes(title='Head-to-head meetings (min. 6)', range=[5, max(10, float(s['meetings'].max())) + 2])
+    fig.update_yaxes(title='Rivalry parity (%)', range=[max(0, np.floor((float(s['parity_pct'].min()) - 5) / 10) * 10), 103], ticksuffix='%', dtick=10)
     return fig
 
 
@@ -182,7 +196,7 @@ app.layout = html.Div(className='page', children=[
     ]),
     html.Section(className='chart-card rivalry', children=[dcc.Graph(id='rivalry-chart', config={'displaylogo': False})]),
     html.Footer(className='footer', children=[
-        html.Div('Click a bar or rivalry bubble to filter the other charts. Use Clear chart selection to return to the overview.'),
+        html.Div('Click a bar, dot, or rivalry bubble to filter the other charts. Dark purple marks the selection; the selected chart keeps its comparison context. Use Clear chart selection to return to the overview.'),
         html.Div('Source: Sahil Motyar / BWF Match Data, underlying results © BWF. Not an official BWF product.'),
     ]),
 ])
@@ -231,13 +245,17 @@ def set_selection(comeback_click, competition_click, rivalry_click, clear):
 )
 def update_views(years, disciplines, tiers, selection):
     """All three figures depend on the same filtered real match rows."""
+    base = select_matches(DATA, years or YEARS, disciplines or [], tiers or [], None)
     d = select_matches(DATA, years or YEARS, disciplines or [], tiers or [], selection)
     if selection:
         label = f"Selected {selection['type']}: {selection['value'].replace('::',' vs. ')}"
     else:
         label = 'All players and rivalries'
     status = f'{len(d):,} matches in current view · {label}'
-    return comeback_fig(d, selection), competition_fig(d), rivalry_fig(d), status
+    kind = selection.get('type') if selection else None
+    return (comeback_fig(base if kind == 'player' else d, selection),
+            competition_fig(base if kind == 'discipline' else d, selection),
+            rivalry_fig(base if kind == 'rivalry' else d, selection), status)
 
 
 if __name__ == '__main__':

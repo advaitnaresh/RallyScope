@@ -14,10 +14,10 @@ The `docs/` folder contains a GitHub Pages version of the same three-view dashbo
 The app loads the **full proposed BWF match dataset** after you run the download step, validates recorded score sequences, and displays three separate research views from the Week 5 proposal:
 
 1. **Comeback Leaders (RQ1):** horizontal bars of comeback success rates after losing Game 1 (minimum 10 qualifying opportunities in the overview).
-2. **Singles vs. Doubles Competitiveness (RQ2):** deciding-third-game rate for MS, WS, MD, WD, and XD; tooltips include game-point margins.
+2. **Singles vs. Doubles Competitiveness (RQ2):** deciding-third-game rate for MS, WS, MD, WD, and XD, plus an aligned dot plot of average game-point margins.
 3. **Competitive Rivalries (RQ3):** bubble chart of rivalry parity vs. number of meetings, minimum 6 meetings; marker size represents the count of three-game meetings.
 
-**Interactions:** Year, discipline, and tournament-tier filters affect all figures. Clicking a bar or bubble in *any* chart filters the same underlying match rows and updates all three charts. A button clears the selection. Tooltips show underlying counts. When a narrow selection has fewer than ten comeback opportunities, the app labels those contextual rates as exploratory instead of presenting them as established leaderboard rankings.
+**Interactions:** Year, discipline, and tournament-tier filters affect all figures. Clicking a bar, margin dot, or bubble updates the other views while retaining comparison context in the selected view; dark purple indicates the selection. A button clears the chart selection. Comeback bars show opportunities, and tooltips show underlying counts. Rivalry selections may show exploratory comeback rates based on fewer than ten opportunities.
 
 The code uses real source rows only. It **does not contain hardcoded or fake dashboard results**. Unit tests have fabricated mini-fixtures, isolated from the application.
 
