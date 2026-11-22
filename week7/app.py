@@ -36,7 +36,7 @@ TIERS = sorted(DATA['tier'].dropna().unique().tolist(),
                key=lambda t: (TIER_ORDER.index(t) if t in TIER_ORDER else 999, t))
 PURPLE = '#57068C'
 VIOLET = '#7548B4'
-LAVENDER = '#AB88D8'
+LAVENDER = '#A078CA'
 MUTED = '#697184'
 GRID = '#EAE4F1'
 PAPER = '#FFFFFF'
@@ -84,7 +84,7 @@ def comeback_fig(df, selection):
     custom = np.stack([s['competitor'], s['comeback_wins'], s['opportunities']], axis=-1)
     fig.add_trace(go.Bar(
         y=s['competitor'], x=s['rate_pct'], orientation='h',
-        marker={'color': [PURPLE if selection and selection.get('type') == 'player' and selection.get('value') == name else LAVENDER for name in s['competitor']]},
+        marker={'color': [PURPLE if selection and selection.get('type') == 'player' and selection.get('value') == name else LAVENDER for name in s['competitor']], 'line': {'color': '#21132e', 'width': [2 if selection and selection.get('type') == 'player' and selection.get('value') == name else 0 for name in s['competitor']]}},
         customdata=custom, text=[f'{r:.1f}% (n={n})' for r, n in zip(s['rate_pct'], s['opportunities'])],
         textposition='outside', cliponaxis=False,
         hovertemplate='<b>%{customdata[0]}</b><br>Comeback rate %{x:.1f}%'
@@ -111,7 +111,7 @@ def competition_fig(df, selection=None):
                        s['deciding'], s['avg_game_margin'].round(2)], axis=-1)
     fig.add_trace(go.Bar(
         x=s['discipline'].astype(str), y=s['rate_pct'],
-        marker={'color': colors}, customdata=custom,
+        marker={'color': colors, 'line': {'color': '#21132e', 'width': [2 if c == PURPLE else 0 for c in colors]}}, customdata=custom,
         text=[f'{v:.1f}%' for v in s['rate_pct']], textposition='outside', cliponaxis=False,
         hovertemplate='<b>%{customdata[0]}</b><br>Deciding-game rate %{y:.1f}%'
                       '<br>Deciding matches: %{customdata[2]} / %{customdata[1]}'

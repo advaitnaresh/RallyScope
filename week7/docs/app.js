@@ -4,7 +4,7 @@
 const DATA_URL = 'https://raw.githubusercontent.com/SahilMotyar/bwf-match-data/main/matches.csv';
 const DISCIPLINES = ['MS', 'WS', 'MD', 'WD', 'XD'];
 const NAMES = {MS:"Men's singles",WS:"Women's singles",MD:"Men's doubles",WD:"Women's doubles",XD:"Mixed doubles"};
-const COLOR = {purple:'#57068c',violet:'#7548b4',lavender:'#ab88d8',muted:'#697184',grid:'#eae4f1'};
+const COLOR = {purple:'#57068c',violet:'#7548b4',lavender:'#a078ca',muted:'#697184',grid:'#eae4f1'};
 const NS = 'http://www.w3.org/2000/svg';
 const state = {all:[],start:2007,end:2026,disciplines:new Set(DISCIPLINES),tiers:new Set(),selection:null,sourceRows:0};
 
@@ -101,7 +101,8 @@ function drawComeback(data){
   items.forEach((v,i)=>{
     const y=top+i*rowH,short=v.name.length>23?v.name.slice(0,22)+'…':v.name;
     add(svg,'text',{x:left-9,y:y+17,'text-anchor':'end',class:'axis'},short);
-    const bar=add(svg,'rect',{x:left,y:y+3,width:Math.max(1,plotW*v.rate/100),height:20,rx:2,fill:state.selection?.type==='player'&&state.selection.value===v.name?COLOR.purple:COLOR.lavender});
+    const chosen=state.selection?.type==='player'&&state.selection.value===v.name;
+    const bar=add(svg,'rect',{x:left,y:y+3,width:Math.max(1,plotW*v.rate/100),height:20,rx:2,fill:chosen?COLOR.purple:COLOR.lavender,stroke:chosen?'#21132e':'none','stroke-width':chosen?2:0});
     selectable(bar,`${v.name}: ${v.rate.toFixed(1)} percent comeback rate`,()=>{state.selection={type:'player',value:v.name};render();},[v.name,`Comeback rate: ${v.rate.toFixed(1)}%`,`Wins: ${v.wins} / opportunities: ${v.opportunities}`]);
     add(svg,'text',{x:left+plotW*v.rate/100+6,y:y+18,class:'value'},`${v.rate.toFixed(1)}% (n=${v.opportunities})`);
   });
@@ -118,7 +119,8 @@ function drawCompetition(data){
     add(svg,'text',{x,y:top+plotH+23,'text-anchor':'middle',class:'axis'},d);
     if(!v)return;
     const barH=v.rate/max*plotH,y=top+plotH-barH;
-    const bar=add(svg,'rect',{x:x-barW/2,y,width:barW,height:barH,fill:state.selection?.type==='discipline'&&state.selection.value===d?COLOR.purple:COLOR.lavender});
+    const chosen=state.selection?.type==='discipline'&&state.selection.value===d;
+    const bar=add(svg,'rect',{x:x-barW/2,y,width:barW,height:barH,fill:chosen?COLOR.purple:COLOR.lavender,stroke:chosen?'#21132e':'none','stroke-width':chosen?2:0});
     selectable(bar,`${NAMES[d]}: ${v.rate.toFixed(1)} percent deciding games`,()=>{state.selection={type:'discipline',value:d};render();},[NAMES[d],`Deciding-game rate: ${v.rate.toFixed(1)}%`,`Deciding matches: ${v.deciding} / ${v.matches}`,`Avg game-point margin: ${v.avgMargin.toFixed(2)}`]);
     add(svg,'text',{x,y:y-8,'text-anchor':'middle',class:'value'},v.rate.toFixed(1)+'%');
   });
@@ -134,7 +136,7 @@ function drawCompetition(data){
     const v=items.find(x=>x.discipline===d);if(!v)return;
     const x=left+(i+.5)*plotW/5,y=dotBottom-(dotBottom-dotTop)*v.avgMargin/marginMax;
     const chosen=state.selection?.type==='discipline'&&state.selection.value===d;
-    const dot=add(svg,'circle',{cx:x,cy:y,r:6,fill:chosen?COLOR.purple:COLOR.lavender,stroke:COLOR.muted,'stroke-width':1});
+    const dot=add(svg,'circle',{cx:x,cy:y,r:6,fill:chosen?COLOR.purple:COLOR.lavender,stroke:chosen?'#21132e':COLOR.muted,'stroke-width':chosen?2:1});
     selectable(dot,`${NAMES[d]}: average game-point margin ${v.avgMargin.toFixed(2)} points`,()=>{state.selection={type:'discipline',value:d};render();},[NAMES[d],`Average game-point margin: ${v.avgMargin.toFixed(2)} points`,`Matches: ${v.matches}`]);
     add(svg,'text',{x,y:y-10,'text-anchor':'middle',class:'value'},v.avgMargin.toFixed(1));
   });
