@@ -91,50 +91,68 @@ function chartSvg(target,width,height){target.replaceChildren();const svg=svgEl(
 
 function drawComeback(data){
   const target=document.getElementById('comeback-chart');
-  const contextual=state.selection&&['player','rivalry'].includes(state.selection.type);
+  const contextual=state.selection&&state.selection.type==='rivalry';
   document.getElementById('comeback-subhead').textContent='Recovery win rate after Game 1 loss · '+(contextual?'exploratory small samples':'minimum 10 opportunities');
   const items=comebackSummary(data,contextual?1:10);
   if(!items.length)return empty(target,'No competitor has enough score-valid comeback opportunities under these filters.');
-  const w=720,h=390,left=176,right=60,top=12,rowH=27,plotW=w-left-right;
+  const w=720,h=390,left=176,right=110,top=12,rowH=27,plotW=w-left-right;
   const svg=chartSvg(target,w,h);
   for(const tick of [0,25,50,75,100]){const x=left+plotW*tick/100;add(svg,'line',{x1:x,y1:top,x2:x,y2:top+12*rowH,class:'grid'});add(svg,'text',{x,y:top+12*rowH+19,'text-anchor':'middle',class:'axis'},String(tick));}
   items.forEach((v,i)=>{
     const y=top+i*rowH,short=v.name.length>23?v.name.slice(0,22)+'…':v.name;
     add(svg,'text',{x:left-9,y:y+17,'text-anchor':'end',class:'axis'},short);
-    const bar=add(svg,'rect',{x:left,y:y+3,width:Math.max(1,plotW*v.rate/100),height:20,rx:2,fill:i===0?COLOR.purple:COLOR.lavender});
+    const bar=add(svg,'rect',{x:left,y:y+3,width:Math.max(1,plotW*v.rate/100),height:20,rx:2,fill:state.selection?.type==='player'&&state.selection.value===v.name?COLOR.purple:COLOR.lavender});
     selectable(bar,`${v.name}: ${v.rate.toFixed(1)} percent comeback rate`,()=>{state.selection={type:'player',value:v.name};render();},[v.name,`Comeback rate: ${v.rate.toFixed(1)}%`,`Wins: ${v.wins} / opportunities: ${v.opportunities}`]);
-    add(svg,'text',{x:Math.min(left+plotW*v.rate/100+6,w-40),y:y+18,class:'value'},v.rate.toFixed(1)+'%');
+    add(svg,'text',{x:left+plotW*v.rate/100+6,y:y+18,class:'value'},`${v.rate.toFixed(1)}% (n=${v.opportunities})`);
   });
   add(svg,'text',{x:left+plotW/2,y:h-7,'text-anchor':'middle',class:'axis'},'Comeback success rate (%)');
 }
 function drawCompetition(data){
   const target=document.getElementById('competition-chart'),items=competitionSummary(data);
   if(!items.length)return empty(target,'No score-valid matches under these filters.');
-  const w=720,h=390,left=68,right=26,top=24,bottom=64,plotW=w-left-right,plotH=h-top-bottom;
+  const w=720,h=500,left=68,right=26,top=24,bottom=174,plotW=w-left-right,plotH=h-top-bottom;
   const svg=chartSvg(target,w,h),max=Math.max(50,Math.ceil((Math.max(...items.map(v=>v.rate))+12)/10)*10);
   for(let tick=0;tick<=max;tick+=10){const y=top+plotH*(1-tick/max);add(svg,'line',{x1:left,y1:y,x2:w-right,y2:y,class:'grid'});add(svg,'text',{x:left-9,y:y+4,'text-anchor':'end',class:'axis'},tick+'%');}
   DISCIPLINES.forEach((d,i)=>{
     const v=items.find(x=>x.discipline===d),x=left+(i+.5)*plotW/5,barW=75;
-    add(svg,'text',{x,y:h-35,'text-anchor':'middle',class:'axis'},d);
+    add(svg,'text',{x,y:top+plotH+23,'text-anchor':'middle',class:'axis'},d);
     if(!v)return;
     const barH=v.rate/max*plotH,y=top+plotH-barH;
-    const bar=add(svg,'rect',{x:x-barW/2,y,width:barW,height:barH,fill:i<2?COLOR.purple:COLOR.lavender});
+    const bar=add(svg,'rect',{x:x-barW/2,y,width:barW,height:barH,fill:state.selection?.type==='discipline'&&state.selection.value===d?COLOR.purple:COLOR.lavender});
     selectable(bar,`${NAMES[d]}: ${v.rate.toFixed(1)} percent deciding games`,()=>{state.selection={type:'discipline',value:d};render();},[NAMES[d],`Deciding-game rate: ${v.rate.toFixed(1)}%`,`Deciding matches: ${v.deciding} / ${v.matches}`,`Avg game-point margin: ${v.avgMargin.toFixed(2)}`]);
     add(svg,'text',{x,y:y-8,'text-anchor':'middle',class:'value'},v.rate.toFixed(1)+'%');
   });
+  const dotTop=top+plotH+60,dotBottom=h-56;
+  const marginMax=Math.max(2,Math.ceil(Math.max(...items.map(v=>v.avgMargin))*1.2/2)*2);
+  add(svg,'text',{x:left,y:dotTop-13,class:'axis'},'Average game-point margin (points)');
+  for(let tick=0;tick<=marginMax;tick+=Math.max(1,marginMax/4)){
+    const y=dotBottom-(dotBottom-dotTop)*tick/marginMax;
+    add(svg,'line',{x1:left,y1:y,x2:w-right,y2:y,class:'grid'});
+    add(svg,'text',{x:left-9,y:y+4,'text-anchor':'end',class:'axis'},Number(tick.toFixed(1)));
+  }
+  DISCIPLINES.forEach((d,i)=>{
+    const v=items.find(x=>x.discipline===d);if(!v)return;
+    const x=left+(i+.5)*plotW/5,y=dotBottom-(dotBottom-dotTop)*v.avgMargin/marginMax;
+    const chosen=state.selection?.type==='discipline'&&state.selection.value===d;
+    const dot=add(svg,'circle',{cx:x,cy:y,r:6,fill:chosen?COLOR.purple:COLOR.lavender,stroke:COLOR.muted,'stroke-width':1});
+    selectable(dot,`${NAMES[d]}: average game-point margin ${v.avgMargin.toFixed(2)} points`,()=>{state.selection={type:'discipline',value:d};render();},[NAMES[d],`Average game-point margin: ${v.avgMargin.toFixed(2)} points`,`Matches: ${v.matches}`]);
+    add(svg,'text',{x,y:y-10,'text-anchor':'middle',class:'value'},v.avgMargin.toFixed(1));
+  });
   add(svg,'text',{x:w/2,y:h-8,'text-anchor':'middle',class:'axis'},'MS · WS · MD · WD · XD (click to filter)');
-  add(svg,'text',{x:16,y:h/2,transform:`rotate(-90 16 ${h/2})`,'text-anchor':'middle',class:'axis'},'Deciding-game rate (%)');
+  add(svg,'text',{x:16,y:top+plotH/2,transform:`rotate(-90 16 ${top+plotH/2})`,'text-anchor':'middle',class:'axis'},'Deciding-game rate (%)');
 }
 function drawRivalries(data){
   const target=document.getElementById('rivalry-chart'),items=rivalrySummary(data);
   if(!items.length)return empty(target,'No rivalry with at least 6 meetings under these filters.');
   const w=1440,h=340,left=74,right=30,top=19,bottom=57,plotW=w-left-right,plotH=h-top-bottom;
-  const svg=chartSvg(target,w,h),maxX=Math.max(10,...items.map(v=>v.meetings))+2;
-  for(const tick of [0,20,40,60,80,100]){const y=top+plotH*(1-tick/100);add(svg,'line',{x1:left,y1:y,x2:w-right,y2:y,class:'grid'});add(svg,'text',{x:left-10,y:y+4,'text-anchor':'end',class:'axis'},tick+'%');}
-  const step=maxX>30?5:2;for(let tick=0;tick<=maxX;tick+=step){const x=left+plotW*tick/maxX;add(svg,'text',{x,y:h-bottom+19,'text-anchor':'middle',class:'axis'},String(tick));}
+  const svg=chartSvg(target,w,h),minX=5,maxX=Math.max(10,...items.map(v=>v.meetings))+2;
+  const minY=Math.max(0,Math.floor((Math.min(...items.map(v=>v.parity))-5)/10)*10),maxY=105;
+  for(let tick=Math.ceil(minY/10)*10;tick<=100;tick+=10){const y=top+plotH*(maxY-tick)/(maxY-minY);add(svg,'line',{x1:left,y1:y,x2:w-right,y2:y,class:'grid'});add(svg,'text',{x:left-10,y:y+4,'text-anchor':'end',class:'axis'},tick+'%');}
+  const step=maxX>30?5:2;for(let tick=Math.ceil(minX/step)*step;tick<=maxX;tick+=step){const x=left+plotW*(tick-minX)/(maxX-minX);add(svg,'text',{x,y:h-bottom+19,'text-anchor':'middle',class:'axis'},String(tick));}
   for(const v of items){
-    const x=left+plotW*v.meetings/maxX,y=top+plotH*(1-v.parity/100),r=Math.max(5,3.5+2.8*Math.sqrt(v.deciding));
-    const bubble=add(svg,'circle',{cx:x,cy:y,r,fill:COLOR.violet,'fill-opacity':.64,stroke:COLOR.purple,'stroke-width':.7});
+    const x=left+plotW*(v.meetings-minX)/(maxX-minX),y=top+plotH*(maxY-v.parity)/(maxY-minY),r=Math.max(5,3.5+2.8*Math.sqrt(v.deciding));
+    const chosen=state.selection?.type==='rivalry'&&state.selection.value===v.id;
+    const bubble=add(svg,'circle',{cx:x,cy:y,r,fill:chosen?COLOR.purple:COLOR.lavender,'fill-opacity':chosen?1:.64,stroke:chosen?COLOR.purple:COLOR.muted,'stroke-width':chosen?2:.7});
     selectable(bubble,`${v.sideA} versus ${v.sideB}: ${v.meetings} meetings, ${v.parity.toFixed(1)} percent parity`,()=>{state.selection={type:'rivalry',value:v.id};render();},[`${v.sideA} vs. ${v.sideB}`,`Meetings: ${v.meetings}`,`${v.sideA} wins: ${v.sideAWins}`,`Head-to-head parity: ${v.parity.toFixed(1)}%`,`Deciding games: ${v.deciding}`]);
   }
   add(svg,'text',{x:w/2,y:h-6,'text-anchor':'middle',class:'axis'},'Head-to-head meetings (min. 6)');
@@ -146,7 +164,9 @@ function render(){
   if(state.selection){const s=state.selection;if(s.type==='player')data=base.filter(r=>r.a===s.value||r.b===s.value);else if(s.type==='discipline')data=base.filter(r=>r.discipline===s.value);else if(s.type==='rivalry')data=base.filter(r=>r.rivalryId===s.value);}
   const label=state.selection?`${state.selection.type}: ${state.selection.value.replace(/::/g,' · ')}`:'All players and rivalries';
   document.getElementById('status').textContent=`${data.length.toLocaleString()} matches · ${state.start}–${state.end} · ${label}`;
-  drawComeback(data);drawCompetition(data);drawRivalries(data);
+  drawComeback(state.selection?.type==='player'?base:data);
+  drawCompetition(state.selection?.type==='discipline'?base:data);
+  drawRivalries(state.selection?.type==='rivalry'?base:data);
 }
 function setupFilters(){
   const years=[...new Set(state.all.map(r=>r.year))].sort((a,b)=>a-b),lo=document.getElementById('start-year'),hi=document.getElementById('end-year');
